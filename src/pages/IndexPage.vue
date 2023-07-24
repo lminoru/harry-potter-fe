@@ -33,13 +33,14 @@
           <strong>Casa:</strong> {{ personagem.house }} <br>
           <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
           <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
-          <strong>Apelidos:</strong> {{ personagem.nickname }} <br>
-          <q-input outlined v-model="nickname" label="Nickname">
+          <template v-if="personagem.nickname">
+            <strong>Apelido:</strong> {{ personagem.nickname }}
+          </template> <br>
+          <q-input outlined v-model="nickname" label="Digite um apelido" counter maxlength="30">
             <template v-slot:append>
               <q-btn round dense flat icon="add" @click="addNickname"></q-btn>
             </template>
           </q-input>
-
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -86,27 +87,28 @@ export default {
         .then(() => {
           this.personagens.forEach(async (p) => {
             const { data, error } = await supabase
-              .from('favoritos')
-              .select('favorite')
+              .from('characters')
+              .select('*')
               .eq('name', p.name);
 
             if (error) {
-              console.log('Favorito n encontrado:', error);
+              console.log('Personagem não encontrado:', error);
             } else if (data.length !== 0) {
               p.favorite = data[0].favorite;
-              console.log('Favorito encontrado:', data);
+              p.nickname = data[0].nickname;
+              console.log('Personagem encontrado:', data);
             } else {
-              const newFavorite = { name: p.name, favorite: false };
-              await supabase.from('favoritos').insert([newFavorite]);
-              console.log('Favorito n encontrado:', error);
+              const newCharacter = { name: p.name, favorite: false, nickname: '' };
+              await supabase.from('characters').insert([newCharacter]);
+              console.log('Personagem não encontrado:', error);
             }
           });
         });
     },
     async favoritar() {
       this.personagem.favorite = true;
-      const updatedFavorite = { name: this.personagem.name, favorite: true };
-      const { data, error } = await supabase.from('favoritos').update([updatedFavorite]).eq('name', this.personagem.name);
+      const updatedFavorite = { favorite: true };
+      const { data, error } = await supabase.from('characters').update([updatedFavorite]).eq('name', this.personagem.name);
 
       if (error) {
         console.error('Erro ao salvar o favorito:', error.message);
@@ -116,8 +118,8 @@ export default {
     },
     async desfavoritar() {
       this.personagem.favorite = false;
-      const updatedFavorite = { name: this.personagem.name, favorite: false };
-      const { data, error } = await supabase.from('favoritos').update([updatedFavorite]).eq('name', this.personagem.name);
+      const updatedFavorite = { favorite: false };
+      const { data, error } = await supabase.from('characters').update([updatedFavorite]).eq('name', this.personagem.name);
 
       if (error) {
         console.error('Erro ao remover favorito:', error.message);
@@ -125,8 +127,17 @@ export default {
         console.log('Favorito removido com sucesso:', data);
       }
     },
-    addNickname() {
+    async addNickname() {
       this.personagem.nickname = this.nickname;
+      this.nickname = '';
+      const updatedFavorite = { nickname: this.personagem.nickname };
+      const { data, error } = await supabase.from('characters').update([updatedFavorite]).eq('name', this.personagem.name);
+
+      if (error) {
+        console.error('Erro ao salvar nickname:', error.message);
+      } else {
+        console.log('Nickname salvo com sucesso:', data);
+      }
     },
   },
   computed: {
