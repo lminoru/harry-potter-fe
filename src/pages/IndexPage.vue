@@ -97,26 +97,25 @@ export default {
         });
     },
     async favoritar() {
-      console.log(this.$supabase);
       this.personagem.favorite = true;
-      const newFavorite = { name: this.personagem.name, favorite: true };
-      const { data, error } = await supabase.from('favoritos').insert([newFavorite]);
+      const updatedFavorite = { name: this.personagem.name, favorite: true };
+      const { data, error } = await supabase.from('favoritos').update([updatedFavorite]).eq('name', this.personagem.name);
 
       if (error) {
-        console.error('Erro ao inserir o favorito:', error.message);
+        console.error('Erro ao salvar o favorito:', error.message);
       } else {
-        console.log('Usuário inserido com sucesso:', data);
+        console.log('Favorito salvo com sucesso:', data);
       }
     },
     async desfavoritar() {
       this.personagem.favorite = false;
-      const newFavorite = { name: this.personagem.name, favorite: false };
-      const { data, error } = await supabase.from('favoritos').insert([newFavorite]);
+      const updatedFavorite = { name: this.personagem.name, favorite: false };
+      const { data, error } = await supabase.from('favoritos').update([updatedFavorite]).eq('name', this.personagem.name);
 
       if (error) {
-        console.error('Erro ao remover o favorito:', error.message);
+        console.error('Erro ao remover favorito:', error.message);
       } else {
-        console.log('Usuário inserido com sucesso:', data);
+        console.log('Favorito removido com sucesso:', data);
       }
     },
   },
