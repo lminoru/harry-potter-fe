@@ -24,6 +24,14 @@
           <strong>Casa:</strong> {{ personagem.house }} <br>
           <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
           <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
+          <template v-if="personagem.favorite == true">
+            <q-btn icon="favorite" color="red" @click="personagem.favorite = false"></q-btn>
+          </template>
+          <template v-else>
+            <q-btn icon="favorite"
+              @click="personagem.favorite = true">
+            </q-btn>
+          </template>
 
         </q-card-section>
       </q-card>
@@ -61,7 +69,7 @@ export default {
       fetch(url)
         .then((data) => (data.json()))
         .then((response) => {
-          this.personagens = response;
+          this.personagens = response.map((p) => ({ favorite: false, ...p }));
           this.loading = false;
         });
     },
