@@ -20,10 +20,6 @@
 
         <q-card-section>
           <q-img :src="personagem.image" :ratio="4 / 3" />
-          <strong>Sexo:</strong> {{ personagem.gender }} <br>
-          <strong>Casa:</strong> {{ personagem.house }} <br>
-          <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
-          <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
           <template v-if="personagem.favorite == true">
             <!-- eslint-disable-next-line max-len -->
             <q-btn icon="favorite" color="red" class="mt-20" @click="desfavoritar"></q-btn>
@@ -32,7 +28,17 @@
             <q-btn icon="favorite" class="mt-20"
               @click="favoritar">
             </q-btn>
-          </template>
+          </template> <br>
+          <strong>Sexo:</strong> {{ personagem.gender }} <br>
+          <strong>Casa:</strong> {{ personagem.house }} <br>
+          <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
+          <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
+          <strong>Apelidos:</strong> {{ personagem.nickname }} <br>
+          <q-input outlined v-model="nickname" label="Nickname">
+            <template v-slot:append>
+              <q-btn round dense flat icon="add" @click="addNickname"></q-btn>
+            </template>
+          </q-input>
 
         </q-card-section>
       </q-card>
@@ -62,6 +68,7 @@ export default {
       personagem: undefined,
       filter: '',
       personagens: [],
+      nickname: '',
       loading: false,
       imgPersonagemAberta: false,
     };
@@ -73,7 +80,7 @@ export default {
       fetch(url)
         .then((data) => (data.json()))
         .then((response) => {
-          this.personagens = response.map((p) => ({ favorite: false, ...p }));
+          this.personagens = response.map((p) => ({ favorite: false, nickname: '', ...p }));
           this.loading = false;
         })
         .then(() => {
@@ -117,6 +124,9 @@ export default {
       } else {
         console.log('Favorito removido com sucesso:', data);
       }
+    },
+    addNickname() {
+      this.personagem.nickname = this.nickname;
     },
   },
   computed: {
