@@ -25,11 +25,12 @@
           <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
           <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
           <template v-if="personagem.favorite == true">
-            <q-btn icon="favorite" color="red" @click="personagem.favorite = false"></q-btn>
+            <!-- eslint-disable-next-line max-len -->
+            <q-btn icon="favorite" color="red" class="mt-20" @click="desfavoritar"></q-btn>
           </template>
           <template v-else>
-            <q-btn icon="favorite"
-              @click="personagem.favorite = true">
+            <q-btn icon="favorite" class="mt-20"
+              @click="favoritar">
             </q-btn>
           </template>
 
@@ -51,6 +52,9 @@
   </q-page>
 </template>
 <script>
+import useSupabase from 'boot/supabase';
+
+const { supabase } = useSupabase();
 
 export default {
   data() {
@@ -63,7 +67,7 @@ export default {
     };
   },
   methods: {
-    loadPersonagens() {
+    async loadPersonagens() {
       this.loading = true;
       const url = 'https://hp-api.onrender.com/api/characters';
       fetch(url)
@@ -71,7 +75,49 @@ export default {
         .then((response) => {
           this.personagens = response.map((p) => ({ favorite: false, ...p }));
           this.loading = false;
+        })
+        .then(() => {
+          this.personagens.forEach(async (p) => {
+            const { data, error } = await supabase
+              .from('favoritos')
+              .select('favorite')
+              .eq('name', p.name);
+
+            if (error) {
+              console.log('Favorito n encontrado:', error);
+            } else if (data.length !== 0) {
+              p.favorite = data[0].favorite;
+              console.log('Favorito encontrado:', data);
+            } else {
+              const newFavorite = { name: p.name, favorite: false };
+              await supabase.from('favoritos').insert([newFavorite]);
+              console.log('Favorito n encontrado:', error);
+            }
+          });
         });
+    },
+    async favoritar() {
+      console.log(this.$supabase);
+      this.personagem.favorite = true;
+      const newFavorite = { name: this.personagem.name, favorite: true };
+      const { data, error } = await supabase.from('favoritos').insert([newFavorite]);
+
+      if (error) {
+        console.error('Erro ao inserir o favorito:', error.message);
+      } else {
+        console.log('Usuário inserido com sucesso:', data);
+      }
+    },
+    async desfavoritar() {
+      this.personagem.favorite = false;
+      const newFavorite = { name: this.personagem.name, favorite: false };
+      const { data, error } = await supabase.from('favoritos').insert([newFavorite]);
+
+      if (error) {
+        console.error('Erro ao remover o favorito:', error.message);
+      } else {
+        console.log('Usuário inserido com sucesso:', data);
+      }
     },
   },
   computed: {
