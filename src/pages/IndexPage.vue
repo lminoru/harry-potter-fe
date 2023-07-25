@@ -29,10 +29,10 @@
               @click="favoritar">
             </q-btn>
           </template> <br>
-          <strong>Sexo:</strong> {{ personagem.gender }} <br>
+          <strong>Sexo:</strong> {{ getGender }} <br>
           <strong>Casa:</strong> {{ personagem.house }} <br>
           <strong>Ano de nascimento:</strong> {{ personagem.yearOfBirth }} <br>
-          <strong>Estudante de Hogwarts:</strong> {{ personagem.hogwartsStudent }} <br>
+          <strong>Estudante de Hogwarts:</strong> {{ getIsStudent }} <br>
           <template v-if="personagem.nickname">
             <strong>Apelido:</strong> {{ personagem.nickname }}
           </template> <br>
@@ -143,6 +143,20 @@ export default {
   computed: {
     personagensSelecionado() {
       return this.personagens.filter((e) => (e.name.match(this.filter)));
+    },
+    getGender() {
+      if (this.personagem) {
+        if (this.personagem.gender === 'male') { return 'Masculino'; }
+        return 'Feminino';
+      }
+      return '';
+    },
+    getIsStudent() {
+      if (this.personagem) {
+        if (this.personagem.hogwartsStudent === true) { return 'Positivo'; }
+        return 'Negativo';
+      }
+      return '';
     },
   },
 };
